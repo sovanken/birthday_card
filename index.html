@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(-45deg, #ffe6f0, #fff0f5, #e6f0ff, #f0fff0);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow-x: hidden;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      padding: 20px;
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1000px;
+    }
+
+    .gift-box {
+      width: 150px;
+      height: 150px;
+      position: relative;
+      transform-style: preserve-3d;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .gift-box:hover {
+      transform: scale(1.05) rotate(5deg);
+    }
+
+    .gift-lid {
+      position: absolute;
+      width: 100%;
+      height: 30px;
+      background: linear-gradient(45deg, #ff9ecd, #ffb7dd);
+      border-radius: 10px;
+      top: -20px;
+      transform-origin: bottom;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .gift-bottom {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #ff80bf, #ff99cc);
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .ribbon {
+      position: absolute;
+      background: #ff4d94;
+    }
+
+    .ribbon-vertical {
+      width: 20px;
+      height: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .ribbon-horizontal {
+      width: 100%;
+      height: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .bow {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2em;
+      color: #ff4d94;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .message-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s;
+      padding: 20px;
+      z-index: 1000;
+    }
+
+    .message-container.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .message {
+      background: white;
+      padding: 30px;
+      border-radius: 25px;
+      box-shadow: 0 10px 30px rgba(255,77,148,0.2);
+      max-width: 90%;
+      width: 400px;
+      position: relative;
+      transform: scale(0.9);
+      opacity: 0;
+      transition: all 0.5s;
+    }
+
+    .message-container.show .message {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .message h1 {
+      color: #ff4d94;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .message-content {
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .message p {
+      margin: 15px 0;
+      color: #666;
+      font-size: 1.1em;
+    }
+
+    .special-text {
+      color: #ff4d94;
+      font-weight: bold;
+      font-size: 1.2em;
+      margin: 20px 0;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #ff4d94;
+      color: white;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s;
+    }
+
+    .close-btn:hover {
+      transform: scale(1.1);
+      background: #ff80bf;
+    }
+
+    .particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 1001;
+    }
+
+    .hearts {
+      position: absolute;
+      font-size: 20px;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    @media (max-width: 480px) {
+      .gift-box {
+        width: 120px;
+        height: 120px;
+      }
+
+      .message {
+        padding: 20px;
+      }
+
+      .message h1 {
+        font-size: 1.5em;
+      }
+
+      .message p {
+        font-size: 1em;
+      }
+
+      .special-text {
+        font-size: 1.1em;
+      }
+    }
+
+    .decoration {
+      position: fixed;
+      pointer-events: none;
+      z-index: -1;
+      animation: float 3s ease-in-out infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background decorations -->
+  <div id="decorations"></div>
+
+  <div class="container">
+    <div class="gift-box">
+      <div class="gift-lid"></div>
+      <div class="gift-bottom">
+        <div class="ribbon ribbon-vertical"></div>
+        <div class="ribbon ribbon-horizontal"></div>
+      </div>
+      <div class="bow">🎀</div>
+    </div>
+  </div>
+
+  <div class="message-container">
+    <div class="message">
+      <button class="close-btn">×</button>
+      <h1>🌟 Happy Birthday name! 🌟</h1>
+      <div class="message-content">
+        <p class="special-text">✨ Sending you the sweetest birthday wishes! ✨</p>
+        
+        <p>Like a rainbow after the rain,<br>
+        You bring colors to everyone's day!</p>
+
+        <p class="special-text">On your special day:</p>
+        
+        <p>🌸 May your smile shine bright<br>
+        💫 May your dreams take flight<br>
+        💝 May your heart feel light<br>
+        🎀 May everything feel just right</p>
+
+        <p class="special-text">Wishing you:</p>
+        <p>🍰 Sweet moments to cherish<br>
+        🎈 Happy memories to keep<br>
+        💖 Love that grows deeper<br>
+        ✨ Joy that lasts forever</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Create background decorations
+    const decorations = ['🌸', '🎀', '✨', '💖', '🎈'];
+    const decorationsContainer = document.getElementById('decorations');
+
+    for(let i = 0; i < 20; i++) {
+      const decoration = document.createElement('div');
+      decoration.className = 'decoration';
+      decoration.innerHTML = decorations[Math.floor(Math.random() * decorations.length)];
+      decoration.style.left = Math.random() * 100 + 'vw';
+      decoration.style.top = Math.random() * 100 + 'vh';
+      decoration.style.fontSize = (Math.random() * 20 + 10) + 'px';
+      decoration.style.animationDelay = (Math.random() * 2) + 's';
+      decorationsContainer.appendChild(decoration);
+    }
+
+    const giftBox = document.querySelector('.gift-box');
+    const giftLid = document.querySelector('.gift-lid');
+    const messageContainer = document.querySelector('.message-container');
+    const closeBtn = document.querySelector('.close-btn');
+
+    function createParticle(x, y, type) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.innerHTML = type;
+      particle.style.left = x + 'px';
+      particle.style.top = y + 'px';
+      document.body.appendChild(particle);
+
+      gsap.to(particle, {
+        x: (Math.random() - 0.5) * window.innerWidth / 2,
+        y: -window.innerHeight / 2,
+        rotation: Math.random() * 360,
+        duration: Math.random() * 2 + 1,
+        ease: "power1.out",
+        onComplete: () => particle.remove()
+      });
+    }
+
+    function createHeart(x, y) {
+      const heart = document.createElement('div');
+      heart.className = 'hearts';
+      heart.innerHTML = '💖';
+      heart.style.left = x + 'px';
+      heart.style.top = y + 'px';
+      document.body.appendChild(heart);
+
+      gsap.to(heart, {
+        y: -100,
+        opacity: 0,
+        duration: 1,
+        ease: "power1.out",
+        onComplete: () => heart.remove()
+      });
+    }
+
+    giftBox.addEventListener('click', () => {
+      gsap.to(giftLid, {
+        rotationX: -180,
+        duration: 1,
+        ease: "back.out(1.7)"
+      });
+
+      messageContainer.classList.add('show');
+
+      // Create burst effect
+      const rect = giftBox.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      for(let i = 0; i < 30; i++) {
+        setTimeout(() => {
+          createParticle(
+            centerX,
+            centerY,
+            ['🎈', '✨', '💖', '🎀', '🌸'][Math.floor(Math.random() * 5)]
+          );
+        }, i * 50);
+      }
+    });
+
+    closeBtn.addEventListener('click', () => {
+      messageContainer.classList.remove('show');
+      gsap.to(giftLid, {
+        rotationX: 0,
+        duration: 0.5
+      });
+    });
+
+    // Floating hearts on hover
+    giftBox.addEventListener('mousemove', (e) => {
+      if(Math.random() > 0.8) {
+        createHeart(e.pageX, e.pageY);
+      }
+    });
+  </script>
+</body>
+</html>
